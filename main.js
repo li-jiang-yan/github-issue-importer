@@ -52,3 +52,28 @@ async function renderPreview() {
 ownerInput.addEventListener('input', renderPreview);
 repoInput.addEventListener('input', renderPreview);
 renderPreview();
+
+
+// Import GitHub issues
+const fileInput = document.getElementById('file');
+
+async function importIssues(event) {
+  event.preventDefault();
+
+  const file = fileInput.files[0];
+  const text = await file.text();
+
+  for (const [rowNumber, row] of text.split('\n').entries()) {
+    const [title, assignee, body] = row.split(',').map(col => col.trim());
+
+    if (rowNumber === 0) {
+      if (title    !== 'title')    throw new Error('CSV[0][0] !== "title"!');
+      if (assignee !== 'assignee') throw new Error('CSV[0][1] !== "assignee"!');
+      if (body     !== 'body')     throw new Error('CSV[0][2] !== "body"!');
+    } else {
+      console.log(`${title}, ${assignee}, ${body}`);
+    }
+  }
+}
+
+document.querySelector('form').addEventListener('submit', importIssues);
