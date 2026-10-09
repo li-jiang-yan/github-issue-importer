@@ -14,7 +14,6 @@ await octokit.request(
     assignees: [
       '<assignee column>'
     ],
-    milestone: 1,
     labels: [],
     headers: {
       'X-GitHub-Api-Version': '2026-03-10'

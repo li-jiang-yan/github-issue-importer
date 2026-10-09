@@ -1,3 +1,6 @@
+import { Octokit } from "https://esm.sh/@octokit/core";
+
+
 // Example starter JavaScript for disabling form submissions if there are invalid fields
 (() => {
   'use strict'
@@ -62,18 +65,58 @@ async function importIssues(event) {
   event.preventDefault();
 
   try {
+    const owner = ownerInput.value;
+    const repo = repoInput.value;
     const file = fileInput.files[0];
     const text = await file.text();
+    const octokit = new Octokit(
+      {
+        auth: document.getElementById('token').value
+      }
+    );
+    const outputAlert = document.createElement('div');
+    outputAlert.classList.add('alert', 'alert-info', 'alert-dismissible', 'fade', 'show');
 
     for (const [rowNumber, row] of text.split('\n').entries()) {
-      const [title, assignee, body] = row.split(',').map(col => col.trim());
+      const logMessage = document.createElement('div');
+
+      if (row.trim() === '') {
+        logMessage.innerText = 'Done!';
+        outputAlert.appendChild(logMessage);
+        break;
+      }
+
+      const columns = Papa.parse(row).data[0];
+      const [title, assignee, body] = columns;
 
       if (rowNumber === 0) {
         if (title    !== 'title')    throw new Error('CSV[0][0] !== "title"!');
         if (assignee !== 'assignee') throw new Error('CSV[0][1] !== "assignee"!');
         if (body     !== 'body')     throw new Error('CSV[0][2] !== "body"!');
       } else {
-        console.log(`${title}, ${assignee}, ${body}`);
+        if (rowNumber === 1) {
+          output.replaceChildren(outputAlert);
+        }
+
+        const response = await octokit.request(
+          `POST /repos/${owner}/${repo}/issues`,
+          {
+            owner: owner,
+            repo: repo,
+            title: title,
+            body: body,
+            assignees: [
+              assignee
+            ],
+            labels: [],
+            headers: {
+              'X-GitHub-Api-Version': '2026-03-10'
+            }
+          }
+        );
+
+        logMessage.innerText = `${response.status} - title: ${response.data.title}, assignee: ${response.data.assignees[0].login}, body: ${response.data.body}\n\n`;
+        outputAlert.appendChild(logMessage);
       }
     }
   } catch (error) {
