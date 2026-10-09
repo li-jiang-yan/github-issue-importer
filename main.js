@@ -17,3 +17,21 @@
     }, false)
   })
 })();
+
+
+// Render preview
+async function renderPreview() {
+  const code = document.querySelector('code');
+
+  try {
+    const response = await fetch('code.js');
+    const text = await response.text();
+    code.replaceChildren(text);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+
+  hljs.highlightAll();
+}
+
+renderPreview();
