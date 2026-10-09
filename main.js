@@ -20,18 +20,35 @@
 
 
 // Render preview
+const ownerInput = document.getElementById('owner');
+const repoInput = document.getElementById('repo');
+
 async function renderPreview() {
   const code = document.querySelector('code');
+  const owner = ownerInput.value;
+  const repo = repoInput.value;
 
   try {
     const response = await fetch('code.js');
-    const text = await response.text();
+    let text = await response.text();
+
+    if (owner !== '') {
+      text = text.replace('{owner}', owner).replace('OWNER', owner);
+    }
+
+    if (repo !== '') {
+      text = text.replace('{repo}', repo).replace('REPO', repo);
+    };
+
     code.replaceChildren(text);
   } catch (error) {
     console.error('Error:', error);
   }
 
+  delete code.dataset.highlighted;
   hljs.highlightAll();
 }
 
+ownerInput.addEventListener('input', renderPreview);
+repoInput.addEventListener('input', renderPreview);
 renderPreview();
