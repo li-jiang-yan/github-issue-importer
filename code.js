@@ -1,6 +1,8 @@
-const octokit = new Octokit({
-  auth: 'YOUR-TOKEN' // hidden
-})
+const octokit = new Octokit(
+  {
+    auth: 'YOUR-TOKEN' // hidden
+  }
+)
 
 await octokit.request(
   'POST /repos/{owner}/{repo}/issues',
